@@ -1,0 +1,25 @@
+name: Tests
+
+on:
+  push:
+    branches-ignore:
+      - master
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@12.1
+        with:
+          cli: latest
+
+      - name: Verify code base format
+        run: clojure -T:cljfmt check
+
+      - name: Run the clj tests
+        run: clojure -M:dev/test
