@@ -1,4 +1,5 @@
 #kaocha/v1
  {:plugins [:kaocha.plugin/profiling
             :kaocha.plugin/notifier
-            :kaocha.plugin/cloverage]}
+            :kaocha.plugin/cloverage]
+  :cloverage/opts {:codecov? true}}
