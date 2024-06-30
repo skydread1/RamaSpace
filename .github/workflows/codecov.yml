@@ -23,7 +23,7 @@ jobs:
       ## Kaocha with Cloverage generates codecov files
       ## refer to tests.edn
       - name: Run the clj tests
-        run: clojure -M:dev/test
+        run: clojure -M:dev:test
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
