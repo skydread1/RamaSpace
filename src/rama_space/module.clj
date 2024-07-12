@@ -1,6 +1,7 @@
 (ns rama-space.module
   (:use [com.rpl.rama]
-        [com.rpl.rama.path])
+        [com.rpl.rama.path]
+        [com.rpl.rama.ops])
   (:require [com.rpl.rama.path :as path]
             [com.rpl.rama.aggs :as aggs]
             [com.rpl.rama.ops :as ops]
@@ -27,7 +28,7 @@
     (declare-depot setup *user-registrations-depot (hash-by :user-id))
     (declare-depot setup *profile-edits-depot (hash-by :user-id))
     (declare-depot setup *friend-requests-depot (hash-by :user-id))
-    (declare-depot setup *friendship-depot (hash-by :user-id))
+    (declare-depot setup *friendship-depot (hash-by :user-id-1))
     (declare-depot setup *posts-depot (hash-by :to-user-id))
     (declare-depot setup *profile-views-depot (hash-by :to-user-id))
     ;; The .declarePState call declares the PState it uses.
@@ -72,7 +73,6 @@
                (source> *friend-requests-depot :> {:keys [*action *user-id *to-user-id]})
                (<<switch *action
                          (case> :request)
-                         (|hash *user-id)
                          (+compound $$outgoing-friend-requests
                                     {*user-id (aggs/+set-agg *to-user-id)})
                          (|hash *to-user-id)
@@ -80,7 +80,6 @@
                                     {*to-user-id (aggs/+set-agg *user-id)})
 
                          (case> :cancel)
-                         (|hash *user-id)
                          (+compound $$outgoing-friend-requests
                                     {*user-id (aggs/+set-remove-agg *to-user-id)})
                          (|hash *to-user-id)
@@ -90,7 +89,6 @@
                (source> *friendship-depot :> {:keys [*action *user-id-1 *user-id-2]})
                (anchor> <change-friendship>) ;; create new branch
                ;;---------- clear incoming/outgoing friend requests
-               (|hash *user-id-1)
                (+compound $$incoming-friend-requests
                           {*user-id-1 (aggs/+set-remove-agg *user-id-2)})
                (+compound $$outgoing-friend-requests
@@ -104,7 +102,6 @@
                ;;---------- add/remove friendships
                (<<switch *action
                          (case> :add)
-                         (|hash *user-id-1)
                          (+compound $$friends
                                     {*user-id-1 (aggs/+set-agg *user-id-2)})
                          (|hash *user-id-2)
@@ -112,7 +109,6 @@
                                     {*user-id-2 (aggs/+set-agg *user-id-1)})
 
                          (case> :remove)
-                         (|hash *user-id-1)
                          (+compound $$friends
                                     {*user-id-1 (aggs/+set-remove-agg *user-id-2)})
                          (|hash *user-id-2)
@@ -153,5 +149,5 @@
                                  :content *content
                                  :display-name *display-name
                                  :profile-pic *profile-pic} :> *resolved-post)
-                      (|origin)
+                      (|origin) ;; partition back to the "origin", which is the initial task ID of the query
                       (+compound {*post-id (aggs/+last *resolved-post)} :> *result-map))))

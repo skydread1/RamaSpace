@@ -14,6 +14,14 @@ This repo aims at providing an implementation of `rama-space` using the Clojure 
 
 It provides more tests than the original examples.
 
+To have an overview of the different topologies involved, I made the following diagram:
+
+![Rama Topology Diagram](docs/diagram.png)
+
+The diagram above highlight the `stream`, `microbatch` and `query` topologies involved in the project.
+
+It also shows depot partitioning, ETL partitioning and branching.
+
 ## Get clj-kondo congig
 
 ```sh
